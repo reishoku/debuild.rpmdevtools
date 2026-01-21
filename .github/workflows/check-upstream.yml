@@ -1,0 +1,56 @@
+name: Check Upstream Updates
+
+on:
+  schedule:
+  - cron: '0 20 * * *'  # Daily at 05:00 JST (20:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  check-upstream:
+    name: Check for upstream updates
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 1
+
+    - name: Install devscripts
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends --no-install-suggests devscripts
+
+    - name: Check upstream with uscan
+      id: uscan
+      run: |
+        RESULT=$(uscan --report --dehs)
+        echo "$RESULT"
+
+        STATUS=$(echo "$RESULT" | grep -oP '(?<=<status>)[^<]+')
+        if [ "$STATUS" = "newer package available" ]; then
+          UPSTREAM=$(echo "$RESULT" | grep -oP '(?<=<upstream-version>)[^<]+')
+          CURRENT=$(echo "$RESULT" | grep -oP '(?<=<debian-uversion>)[^<]+')
+          echo "update_available=true" >> $GITHUB_OUTPUT
+          echo "upstream_version=$UPSTREAM" >> $GITHUB_OUTPUT
+          echo "current_version=$CURRENT" >> $GITHUB_OUTPUT
+        else
+          echo "update_available=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create issue for update
+      if: steps.uscan.outputs.update_available == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        UPSTREAM="${{ steps.uscan.outputs.upstream_version }}"
+        CURRENT="${{ steps.uscan.outputs.current_version }}"
+
+        # Check if issue already exists
+        EXISTING=$(gh issue list --label upstream-update --search "rpmdevtools ${UPSTREAM}" --json number --jq '.[0].number')
+
+        if [ -z "$EXISTING" ]; then
+          gh issue create \
+            --title "Update rpmdevtools => ${UPSTREAM}" \
+            --label "upstream" \
+            --body "- https://releases.pagure.org/rpmdevtools/rpmdevtools-${UPSTREAM}.tar.xz"
+        fi
