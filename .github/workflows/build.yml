@@ -82,7 +82,8 @@ jobs:
           devscripts \
           fakeroot \
           xz-utils \
-          build-essential
+          build-essential \
+          pkg-config
 
     - name: Build package
       run: |
