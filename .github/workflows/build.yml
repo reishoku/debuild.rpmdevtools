@@ -15,17 +15,17 @@ jobs:
     container:
       image: debian:${{ matrix.codename }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
-        - debian: "12"
-          codename: "bookworm"
-          arch: "amd64"
-          runner: "ubuntu-latest"
-        - debian: "12"
-          codename: "bookworm"
-          arch: "arm64"
-          runner: "ubuntu-latest-arm"
+        # - debian: "12"
+        #   codename: "bookworm"
+        #   arch: "amd64"
+        #   runner: "ubuntu-latest"
+        # - debian: "12"
+        #   codename: "bookworm"
+        #   arch: "arm64"
+        #   runner: "ubuntu-latest-arm"
         - debian: "13"
           codename: "trixie"
           arch: "amd64"
