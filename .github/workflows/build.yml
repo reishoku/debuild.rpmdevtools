@@ -78,12 +78,14 @@ jobs:
           python3-progressbar2 \
           python3-requests \
           python3-rpm \
+          rpm \
           bash-completion \
           devscripts \
           fakeroot \
           xz-utils \
           build-essential \
-          pkg-config
+          pkg-config \
+          python-is-python3
 
     - name: Build package
       run: |
