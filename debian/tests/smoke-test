@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e
+
+echo "Testing rpmdev-bumpspec --version..."
+rpmdev-bumpspec --version
+
+echo "Testing rpmdev-vercmp..."
+rpmdev-vercmp 1.0 2.0 || [ $? -eq 12 ]
+
+echo "Testing rpmdev-spectool --version..."
+rpmdev-spectool --version
+
+echo "Testing rpmdev-setuptree --help..."
+rpmdev-setuptree --help > /dev/null
+
+echo "Testing rpmdev-newspec --help..."
+rpmdev-newspec --help > /dev/null
+
+echo "Testing rpmdev-extract --help..."
+rpmdev-extract --help > /dev/null
+
+echo "Testing rpmdev-diff --help..."
+rpmdev-diff --help > /dev/null
+
+echo "Testing rpminfo --help..."
+rpminfo --help > /dev/null
+
+echo "Testing rpmdev-md5 --help..."
+rpmdev-md5 --help > /dev/null
+
+echo "Testing rpmls --help..."
+rpmls --help > /dev/null
+
+echo "All smoke tests passed!"

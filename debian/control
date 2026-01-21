@@ -1,0 +1,57 @@
+Source: rpmdevtools
+Section: devel
+Priority: optional
+Maintainer: KOSHIKAWA Kenichi <reishoku.misc@pm.me>
+Build-Depends: debhelper-compat (= 13),
+               dh-autoreconf,
+               dh-python,
+               help2man,
+               perl,
+               python3 (>= 3.6),
+               python3-progressbar2,
+               python3-requests,
+               python3-rpm,
+               bash-completion
+Standards-Version: 4.6.2
+Homepage: https://pagure.io/rpmdevtools
+Rules-Requires-Root: no
+
+Package: rpmdevtools
+Architecture: all
+Depends: ${misc:Depends},
+         python3 (>= 3.6),
+         python3-argcomplete,
+         python3-progressbar2,
+         python3-requests,
+         python3-rpm,
+         rpm,
+         file,
+         cpio
+Recommends: curl,
+            diffutils,
+            fakeroot,
+            bzip2,
+            xz-utils,
+            gzip
+Suggests: emacs | emacsen,
+          p7zip-full,
+          unzip,
+          cabextract,
+          unrar-free
+Description: RPM Development Tools
+ This package contains scripts and Emacs support files to aid in
+ development of RPM packages.
+ .
+ Included tools:
+  * rpmdev-setuptree - Create RPM build tree within user's home directory
+  * rpmdev-diff - Diff contents of two archives
+  * rpmdev-newspec - Creates new .spec from template
+  * rpmdev-rmdevelrpms - Find (and optionally remove) "development" RPMs
+  * rpmdev-checksig - Check package signatures using alternate RPM keyring
+  * rpminfo - Print information about executables and libraries
+  * rpmdev-md5/sha* - Display checksums of all files in an archive file
+  * rpmdev-vercmp - RPM version comparison checker
+  * rpmdev-spectool - Expand and download sources and patches in specfiles
+  * rpmdev-wipetree - Erase all files within dirs created by rpmdev-setuptree
+  * rpmdev-extract - Extract various archives, "tar xvf" style
+  * rpmdev-bumpspec - Bump revision in specfile
