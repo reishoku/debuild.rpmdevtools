@@ -1,0 +1,30 @@
+# Upstream source (downloaded and extracted during build)
+rpmdevtools-*/
+
+# Build output
+*.deb
+*.dsc
+*.changes
+*.buildinfo
+*.tar.xz
+*.tar.gz
+
+# Editor files
+*~
+*.swp
+*.swo
+.*.swp
+\#*\#
+.#*
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# Output directory
+output/
+
+# Python
+*.pyc
+__pycache__/
