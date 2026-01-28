@@ -12,16 +12,15 @@ usage generation works in minimal build environments.
 
 --- a/rpmdev-spectool
 +++ b/rpmdev-spectool
-@@ -28,7 +28,6 @@ import tempfile
- import time
- from collections import OrderedDict
- from typing import Optional
- from urllib.parse import urlparse
+@@ -30,7 +30,6 @@
  
  import progressbar
  import requests
 -import rpm
-@@ -77,6 +76,7 @@ def get_args() -> dict:
+ 
+ __version__ = "1.1.0"
+ 
+@@ -88,6 +87,7 @@
      ops.add_argument(
          "--version",
          "-V",
@@ -29,19 +28,19 @@ usage generation works in minimal build environments.
          action="version",
          version="%(prog)s {}".format(__version__),
          help="Print the version and exit",
-@@ -143,6 +143,8 @@ class Spec:
+@@ -280,6 +280,7 @@
+ class Spec:
      def __init__(self, path: str):
          self.path = path
--        self.spec = rpm.spec(self.path)
 +        import rpm
-+
-+        self.spec = rpm.spec(self.path)
-@@ -404,6 +406,8 @@ def main() -> int:
+ 
+         self.spec = rpm.spec(self.path)
+ 
+@@ -493,6 +494,7 @@
          if args["directory"]:
              directory = args["directory"]
          elif args["sourcedir"]:
 +            import rpm
-+
+ 
              directory = rpm.expandMacro("%{_sourcedir}")
          else:
-             directory = os.getcwd()
