@@ -1,1 +1,2 @@
 add-short-v-option-to-rpmdev-spectool.patch
+lazy-import-rpm-for-help2man.patch

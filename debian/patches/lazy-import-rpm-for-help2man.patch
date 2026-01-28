@@ -1,0 +1,39 @@
+From: KOSHIKAWA Kenichi <reishoku.misc@pm.me>
+Date: 2026-01-28
+Subject: rpmdev-spectool: lazy import rpm module
+
+help2man runs rpmdev-spectool just for usage text. Importing the rpm
+module at top-level can fail in minimal environments, which breaks
+manpage generation. Lazy-load rpm only when needed.
+
+---
+ rpmdev-spectool | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+--- a/rpmdev-spectool
++++ b/rpmdev-spectool
+@@ -28,7 +28,6 @@ import tempfile
+ import time
+ from collections import OrderedDict
+ from typing import Optional
+ from urllib.parse import urlparse
+ 
+ import progressbar
+ import requests
+-import rpm
+@@ -143,6 +142,8 @@ class Spec:
+     def __init__(self, path: str):
+         self.path = path
+-        self.spec = rpm.spec(self.path)
++        import rpm
++
++        self.spec = rpm.spec(self.path)
+@@ -404,6 +405,8 @@ def main() -> int:
+         if args["directory"]:
+             directory = args["directory"]
+         elif args["sourcedir"]:
++            import rpm
++
+             directory = rpm.expandMacro("%{_sourcedir}")
+         else:
+             directory = os.getcwd()
