@@ -1,26 +1,16 @@
 From: KOSHIKAWA Kenichi <reishoku.misc@pm.me>
 Date: 2026-01-28
-Subject: rpmdev-spectool: make help2man-friendly
+Subject: rpmdev-spectool: accept -v as version alias
 
-help2man invokes rpmdev-spectool with -v and -h. Accept -v as a version
-alias and delay importing the rpm module until it is actually needed so
-usage generation works in minimal build environments.
+help2man invokes rpmdev-spectool with -v. Accept it as a version alias.
 
 ---
- rpmdev-spectool | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ rpmdev-spectool | 1 +
+ 1 file changed, 1 insertion(+)
 
 --- a/rpmdev-spectool
 +++ b/rpmdev-spectool
-@@ -30,7 +30,6 @@
- 
- import progressbar
- import requests
--import rpm
- 
- __version__ = "1.1.0"
- 
-@@ -88,6 +87,7 @@
+@@ -88,6 +88,7 @@
      ops.add_argument(
          "--version",
          "-V",
@@ -28,19 +18,3 @@ usage generation works in minimal build environments.
          action="version",
          version="%(prog)s {}".format(__version__),
          help="Print the version and exit",
-@@ -280,6 +280,7 @@
- class Spec:
-     def __init__(self, path: str):
-         self.path = path
-+        import rpm
- 
-         self.spec = rpm.spec(self.path)
- 
-@@ -493,6 +494,7 @@
-         if args["directory"]:
-             directory = args["directory"]
-         elif args["sourcedir"]:
-+            import rpm
- 
-             directory = rpm.expandMacro("%{_sourcedir}")
-         else:
