@@ -1,0 +1,202 @@
+# Source archives
+*.tar
+*.tar.bz2
+*.tar.gz
+*.tar.xz
+*.tgz
+*.gz
+*.zip
+*-vendor.tar.xz
+
+# RPM build artifacts
+BUILD/
+BUILDROOT/
+RPMS/
+SOURCES/
+SRPMS/
+rpmbuild/
+*.rpm
+*.src.rpm
+*.srpm
+
+# Upstream source
+upstream/
+
+# Backup files
+*.bak
+*.orig
+*.temp
+*.tmp
+
+# Compiled binaries and libraries
+*.dll
+*.dylib
+*.exe
+*.exe~
+*.out
+*.so
+*.test
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*$py.class
+*.cover
+*.egg
+*.egg-info/
+*.manifest
+*.py[cod]
+*.spec.py
+.Python
+.coverage
+.eggs/
+.env
+.env.*.local
+.env.local
+.hypothesis/
+.installed.cfg
+.mypy_cache/
+.nox/
+.pytest_cache/
+.python-version
+.ruff_cache/
+.tox/
+.venv/
+ENV/
+MANIFEST
+build/
+coverage.xml
+develop-eggs/
+dist/
+downloads/
+eggs/
+env/
+htmlcov/
+lib/
+lib64/
+parts/
+pip-delete-this-directory.txt
+pip-log.txt
+pytestdebug.log
+sdist/
+site-packages/
+var/
+venv/
+wheels/
+
+# Node.js
+.node_repl_history
+.npm/
+.pnpm-store/
+.yarn/
+node_modules/
+npm-debug.log*
+package-lock.json
+package/
+packages/
+pnpm-lock.yaml
+yarn-debug.log*
+yarn-error.log*
+yarn.lock
+
+# Rust
+**/*.rs.bk
+target/
+
+# Go
+/vendor/
+go.sum
+
+# JavaScript build output
+*.js.map
+out/
+
+# Cache
+.cache/
+.eslintcache
+.parcel-cache/
+.stylelintcache
+
+# macOS
+._*
+.AppleDB
+.AppleDesktop
+.AppleDouble
+.DS_Store
+.DocumentRevisions-V100
+.LSOverride
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.apdisk
+.com.apple.timemachine.donotpresent
+.fseventsd
+Network Trash Folder
+Temporary Items
+
+# Windows
+$RECYCLE.BIN/
+*.cab
+*.lnk
+*.msi
+*.msix
+*.msm
+*.msp
+*.stackdump
+[Dd]esktop.ini
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Linux
+*~
+.Trash-*
+.directory
+.fuse_hidden*
+.nfs*
+
+# Vim / Neovim
+!*.svg
+*.swn
+*.swo
+*.swp
+*.un~
+.netrwhist
+.nvimlog
+Session.vim
+Sessionx.vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]*.un~
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+tags
+
+# Emacs
+.\#*
+\#*\#
+
+# VSCode
+*.code-workspace
+.vscode/
+
+# JetBrains
+*.iml
+.idea/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Claude Code
+**/.claude/settings.local.json
