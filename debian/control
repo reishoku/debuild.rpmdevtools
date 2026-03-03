@@ -14,7 +14,7 @@ Build-Depends: debhelper-compat (= 13),
                rpm,
                pkg-config,
                bash-completion
-Standards-Version: 4.6.1
+Standards-Version: 4.6.2
 Homepage: https://pagure.io/rpmdevtools
 Rules-Requires-Root: no
 
@@ -28,11 +28,30 @@ Depends: ${misc:Depends},
          rpm,
          file,
          cpio
-Recommends: perl
+Recommends: perl,
+            curl,
+            diffutils,
+            fakeroot,
+            bzip2,
+            xz-utils,
+            gzip
+Suggests: emacs,
+          p7zip-full,
+          unzip,
+          cabextract,
+          unrar-free
 Description: RPM Development Tools
- rpmdevtools provides several utilities for RPM package development,
- including rpmdev-bumpspec, rpmdev-diff, rpmdev-extract, rpmdev-newspec,
- rpmdev-setuptree, rpmdev-spectool, rpmdev-vercmp, and others.
+ rpmdevtools provides utilities for RPM package development:
  .
- This package includes shell scripts and Python scripts for working
- with RPM spec files, source archives, and RPM version comparison.
+  * rpmdev-setuptree - Create RPM build tree within user's home directory
+  * rpmdev-diff - Diff contents of two archives
+  * rpmdev-newspec - Creates new .spec from template
+  * rpmdev-rmdevelrpms - Find (and optionally remove) "development" RPMs
+  * rpmdev-checksig - Check package signatures using alternate RPM keyring
+  * rpmdev-bumpspec - Bump revision in specfile
+  * rpmdev-vercmp - RPM version comparison checker
+  * rpmdev-spectool - Expand and download sources and patches in specfiles
+  * rpmdev-extract - Extract various archives, "tar xvf" style
+  * rpmdev-wipetree - Erase all files within dirs created by rpmdev-setuptree
+  * rpminfo - Print information about executables and libraries
+  * rpmdev-md5/sha* - Display checksums of all files in an archive file

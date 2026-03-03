@@ -1,0 +1,5 @@
+rpmdevtools (9.6-1) unstable; urgency=low
+
+  * Initial Debian packaging of rpmdevtools 9.6
+
+ -- KOSHIKAWA Kenichi <reishoku.gh@pm.me>  Tue, 03 Mar 2026 22:00:00 +0900
