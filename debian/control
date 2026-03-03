@@ -1,0 +1,38 @@
+Source: rpmdevtools
+Section: devel
+Priority: optional
+Maintainer: KOSHIKAWA Kenichi <reishoku.gh@pm.me>
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-python3,
+               help2man,
+               perl,
+               python3,
+               python-is-python3,
+               python3-rpm,
+               python3-progressbar,
+               python3-requests,
+               rpm,
+               pkg-config,
+               bash-completion
+Standards-Version: 4.6.1
+Homepage: https://pagure.io/rpmdevtools
+Rules-Requires-Root: no
+
+Package: rpmdevtools
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3-rpm,
+         python3-progressbar,
+         python3-requests,
+         rpm,
+         file,
+         cpio
+Recommends: perl
+Description: RPM Development Tools
+ rpmdevtools provides several utilities for RPM package development,
+ including rpmdev-bumpspec, rpmdev-diff, rpmdev-extract, rpmdev-newspec,
+ rpmdev-setuptree, rpmdev-spectool, rpmdev-vercmp, and others.
+ .
+ This package includes shell scripts and Python scripts for working
+ with RPM spec files, source archives, and RPM version comparison.
