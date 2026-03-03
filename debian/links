@@ -1,0 +1,8 @@
+usr/bin/rpmdev-md5 usr/bin/rpmdev-sum
+usr/bin/rpmdev-md5 usr/bin/rpmdev-cksum
+usr/bin/rpmdev-md5 usr/bin/rpmdev-sha1
+usr/bin/rpmdev-md5 usr/bin/rpmdev-sha224
+usr/bin/rpmdev-md5 usr/bin/rpmdev-sha256
+usr/bin/rpmdev-md5 usr/bin/rpmdev-sha384
+usr/bin/rpmdev-md5 usr/bin/rpmdev-sha512
+usr/bin/rpmdev-spectool usr/bin/spectool

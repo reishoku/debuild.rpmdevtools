@@ -1,0 +1,115 @@
+name: Build Debian Packages
+
+on:
+  push:
+    branches: [main, reishoku]
+  pull_request:
+    branches: [main, reishoku]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.distro }} ${{ matrix.codename }} (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ${{ matrix.image }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: debian
+            codename: bookworm
+            image: debian:bookworm
+            arch: amd64
+            runner: ubuntu-latest
+          - distro: debian
+            codename: bookworm
+            image: debian:bookworm
+            arch: arm64
+            runner: ubuntu-latest-arm
+          - distro: debian
+            codename: trixie
+            image: debian:trixie
+            arch: amd64
+            runner: ubuntu-latest
+          - distro: debian
+            codename: trixie
+            image: debian:trixie
+            arch: arm64
+            runner: ubuntu-latest-arm
+          - distro: ubuntu
+            codename: noble
+            image: ubuntu:noble
+            arch: amd64
+            runner: ubuntu-latest
+          - distro: ubuntu
+            codename: noble
+            image: ubuntu:noble
+            arch: arm64
+            runner: ubuntu-latest-arm
+          - distro: ubuntu
+            codename: questing
+            image: ubuntu:questing
+            arch: amd64
+            runner: ubuntu-latest
+          - distro: ubuntu
+            codename: questing
+            image: ubuntu:questing
+            arch: arm64
+            runner: ubuntu-latest-arm
+
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      UPSTREAM_URL: https://releases.pagure.org/rpmdevtools
+
+    steps:
+      - name: Enable universe repository (Ubuntu only)
+        if: matrix.distro == 'ubuntu'
+        run: |
+          sed -i '/^Components:/ s/$/ universe/' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null \
+          || echo "deb http://archive.ubuntu.com/ubuntu ${{ matrix.codename }} universe" >> /etc/apt/sources.list
+
+      - name: Install prerequisites
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends \
+            ca-certificates curl git xz-utils > /dev/null
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Get version from changelog
+        id: version
+        run: |
+          VERSION=$(head -1 debian/changelog | sed 's/.*(\(.*\)).*/\1/' | cut -d- -f1)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download upstream source
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          curl -fsSL -o "rpmdevtools-${VERSION}.tar.xz" \
+            "${UPSTREAM_URL}/rpmdevtools-${VERSION}.tar.xz"
+
+      - name: Install build dependencies
+        run: |
+          apt-get install -y -qq --no-install-recommends devscripts equivs > /dev/null
+          VERSION="${{ steps.version.outputs.version }}"
+          tar xf "rpmdevtools-${VERSION}.tar.xz"
+          cp -a debian "rpmdevtools-${VERSION}/"
+          cd "rpmdevtools-${VERSION}"
+          mk-build-deps --install \
+            --tool "apt-get -y -qq --no-install-recommends" \
+            debian/control > /dev/null
+
+      - name: Build package
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd "rpmdevtools-${VERSION}"
+          dpkg-buildpackage -us -uc -b 2>&1
+
+      - name: Verify package contents
+        run: |
+          dpkg -c rpmdevtools_*.deb
