@@ -11,6 +11,8 @@
 #   CONTAINER_TOOL       - docker or podman (default: docker)
 #   DEBEMAIL             - maintainer email
 #   DEBFULLNAME          - maintainer name
+#   LANG                 - locale (default: C)
+#   TZ                   - timezone (default: Asia/Tokyo)
 #
 set -euo pipefail
 
@@ -19,6 +21,9 @@ TEMPLATE_DIR="${SCRIPT_DIR}/debian"
 CONTAINER_TOOL="${CONTAINER_TOOL:-docker}"
 DEBEMAIL="${DEBEMAIL:-reishoku.gh@pm.me}"
 DEBFULLNAME="${DEBFULLNAME:-'KOSHIKAWA Kenichi'}"
+LANG="${LANG:-C}"
+TZ="${TZ:-Asia/Tokyo}"
+export DEBEMAIL DEBFULLNAME LANG TZ
 
 UPSTREAM_URL="https://releases.pagure.org/rpmdevtools"
 
@@ -57,24 +62,17 @@ fi
 
 # Locate the source tarball (expect exactly one rpmdevtools-*.tar.xz or .tar.gz)
 find_tarball() {
-    local -a tarballs
-    tarballs=("${SCRIPT_DIR}"/rpmdevtools-*.tar.xz "${SCRIPT_DIR}"/rpmdevtools-*.tar.gz)
-    # Filter out non-existent globs
     local -a found=()
-    for t in "${tarballs[@]}"; do
+    for t in "${SCRIPT_DIR}"/rpmdevtools-*.tar.{xz,gz}; do
         [ -f "$t" ] && found+=("$t")
     done
-    if [ ${#found[@]} -eq 0 ]; then
-        echo "Error: no rpmdevtools-*.tar.{xz,gz} found in ${SCRIPT_DIR}" >&2
-        echo "Download from: ${UPSTREAM_URL}/" >&2
-        return 1
-    fi
-    if [ ${#found[@]} -gt 1 ]; then
-        echo "Error: multiple tarballs found; keep exactly one:" >&2
-        printf '  %s\n' "${found[@]}" >&2
-        return 1
-    fi
-    echo "${found[0]}"
+    case ${#found[@]} in
+        0) echo "Error: no rpmdevtools-*.tar.{xz,gz} found in ${SCRIPT_DIR}" >&2
+           echo "Download from: ${UPSTREAM_URL}/" >&2; return 1 ;;
+        1) echo "${found[0]}" ;;
+        *) echo "Error: multiple tarballs found; keep exactly one:" >&2
+           printf '  %s\n' "${found[@]}" >&2; return 1 ;;
+    esac
 }
 
 TARBALL=$(find_tarball)
@@ -83,13 +81,6 @@ SRC_DIR="${TARBALL_NAME%.tar.*}"
 
 # Extract version from tarball name (rpmdevtools-X.Y.tar.xz -> X.Y)
 RPMDEVTOOLS_VERSION="${RPMDEVTOOLS_VERSION:-${SRC_DIR#rpmdevtools-}}"
-
-# Generate RFC 2822 timestamp
-if [ -n "${SOURCE_DATE_EPOCH:-}" ]; then
-    BUILD_TIMESTAMP=$(TZ=Asia/Tokyo date -R -d "@${SOURCE_DATE_EPOCH}")
-else
-    BUILD_TIMESTAMP=$(TZ=Asia/Tokyo date -R)
-fi
 
 usage() {
     echo "Usage: $0 <codename> [codename ...]" >&2
@@ -130,17 +121,20 @@ for codename in "$@"; do
     # Remove stale .deb from previous builds
     rm -f "${out_dir}"/rpmdevtools_*.deb
 
-    # Generate changelog; clean up via trap
-    cat > "$changelog" <<CHLOG
-rpmdevtools (${RPMDEVTOOLS_VERSION}-1~${codename}1) ${codename}; urgency=low
-
-  * New upstream release ${RPMDEVTOOLS_VERSION}
-
- -- ${DEBFULLNAME} <${DEBEMAIL}>  ${BUILD_TIMESTAMP}
-CHLOG
+    # Generate changelog with dch (from devscripts); clean up via trap
+    dch --create --changelog "$changelog" \
+        --package rpmdevtools \
+        --newversion "${RPMDEVTOOLS_VERSION}-1~${codename}1" \
+        --distribution "${codename}" \
+        --urgency low \
+        "New upstream release ${RPMDEVTOOLS_VERSION}"
     trap 'rm -f "$changelog"' EXIT
 
     echo "Building rpmdevtools ${RPMDEVTOOLS_VERSION} for ${codename} (${image})..."
+
+    # Pass SOURCE_DATE_EPOCH to container only if set (for reproducible builds)
+    epoch_args=()
+    [ -n "${SOURCE_DATE_EPOCH:-}" ] && epoch_args=(-e "SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}")
 
     "$CONTAINER_TOOL" run --rm \
         -v "${SCRIPT_DIR}:/src:ro" \
@@ -149,6 +143,7 @@ CHLOG
         -e "SRC_DIR=${SRC_DIR}" \
         -e "TEMPLATE_REL=${TEMPLATE_REL}" \
         -e "IS_UBUNTU=${is_ubuntu}" \
+        "${epoch_args[@]}" \
         "$image" bash -c '
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
@@ -177,7 +172,7 @@ mk-build-deps --install \
     --tool "apt-get -y -qq --no-install-recommends" \
     debian/control > /dev/null
 
-dpkg-buildpackage -us -uc -b 2>&1
+debuild -us -uc -b
 
 cp "$WORKDIR"/rpmdevtools_*.deb /out/
 
