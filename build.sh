@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TEMPLATE_DIR="${SCRIPT_DIR}/debian"
 CONTAINER_TOOL="${CONTAINER_TOOL:-docker}"
 DEBEMAIL="${DEBEMAIL:-reishoku.gh@pm.me}"
-DEBFULLNAME="${DEBFULLNAME:-'KOSHIKAWA Kenichi'}"
+DEBFULLNAME="${DEBFULLNAME:-KOSHIKAWA Kenichi}"
 LANG="${LANG:-C}"
 TZ="${TZ:-Asia/Tokyo}"
 export DEBEMAIL DEBFULLNAME LANG TZ
@@ -52,6 +52,11 @@ TEMPLATE_REL="${TEMPLATE_DIR#"${SCRIPT_DIR}/"}"
 
 if ! command -v "$CONTAINER_TOOL" > /dev/null 2>&1; then
     echo "Error: ${CONTAINER_TOOL} is not installed or not in PATH" >&2
+    exit 1
+fi
+
+if ! command -v dch > /dev/null 2>&1; then
+    echo "Error: dch is not installed (apt-get install devscripts)" >&2
     exit 1
 fi
 
@@ -121,14 +126,13 @@ for codename in "$@"; do
     # Remove stale .deb from previous builds
     rm -f "${out_dir}"/rpmdevtools_*.deb
 
-    # Generate changelog with dch (from devscripts); clean up via trap
+    # Generate changelog with dch (from devscripts)
     dch --create --changelog "$changelog" \
         --package rpmdevtools \
         --newversion "${RPMDEVTOOLS_VERSION}-1~${codename}1" \
         --distribution "${codename}" \
         --urgency low \
         "New upstream release ${RPMDEVTOOLS_VERSION}"
-    trap 'rm -f "$changelog"' EXIT
 
     echo "Building rpmdevtools ${RPMDEVTOOLS_VERSION} for ${codename} (${image})..."
 
@@ -172,7 +176,7 @@ mk-build-deps --install \
     --tool "apt-get -y -qq --no-install-recommends" \
     debian/control > /dev/null
 
-debuild -us -uc -b
+dpkg-buildpackage -us -uc -b
 
 cp "$WORKDIR"/rpmdevtools_*.deb /out/
 
@@ -180,7 +184,6 @@ rm -rf "$WORKDIR"
 '
 
     rm -f "$changelog"
-    trap - EXIT
 
     echo "=== ${codename}: build complete ==="
     ls -la "${out_dir}"/*.deb
