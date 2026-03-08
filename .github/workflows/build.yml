@@ -9,77 +9,52 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.distro }} ${{ matrix.codename }} (${{ matrix.arch }})
+    name: ${{ matrix.codename }} (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
-    container:
-      image: ${{ matrix.image }}
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - distro: debian
-            codename: bookworm
-            image: debian:bookworm
+          - codename: bookworm
             arch: amd64
             runner: ubuntu-latest
-          - distro: debian
-            codename: bookworm
-            image: debian:bookworm
+          - codename: bookworm
             arch: arm64
-            runner: ubuntu-latest-arm
-          - distro: debian
-            codename: trixie
-            image: debian:trixie
+            runner: ubuntu-24.04-arm
+          - codename: trixie
             arch: amd64
             runner: ubuntu-latest
-          - distro: debian
-            codename: trixie
-            image: debian:trixie
+          - codename: trixie
             arch: arm64
-            runner: ubuntu-latest-arm
-          - distro: ubuntu
-            codename: noble
-            image: ubuntu:noble
+            runner: ubuntu-24.04-arm
+          - codename: noble
             arch: amd64
             runner: ubuntu-latest
-          - distro: ubuntu
-            codename: noble
-            image: ubuntu:noble
+          - codename: noble
             arch: arm64
-            runner: ubuntu-latest-arm
-          - distro: ubuntu
-            codename: questing
-            image: ubuntu:questing
+            runner: ubuntu-24.04-arm
+          - codename: questing
             arch: amd64
             runner: ubuntu-latest
-          - distro: ubuntu
-            codename: questing
-            image: ubuntu:questing
+          - codename: questing
             arch: arm64
-            runner: ubuntu-latest-arm
+            runner: ubuntu-24.04-arm
 
     env:
       DEBIAN_FRONTEND: noninteractive
       UPSTREAM_URL: https://releases.pagure.org/rpmdevtools
 
     steps:
-      - name: Enable universe repository (Ubuntu only)
-        if: matrix.distro == 'ubuntu'
-        run: |
-          sed -i '/^Components:/ s/$/ universe/' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null \
-          || echo "deb http://archive.ubuntu.com/ubuntu ${{ matrix.codename }} universe" >> /etc/apt/sources.list
-
-      - name: Install prerequisites
-        run: |
-          apt-get update -qq
-          apt-get install -y -qq --no-install-recommends \
-            ca-certificates curl git xz-utils > /dev/null
-
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
+
+      - name: Install devscripts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends devscripts > /dev/null
 
       - name: Get version from changelog
         id: version
@@ -93,23 +68,8 @@ jobs:
           curl -fsSL -o "rpmdevtools-${VERSION}.tar.xz" \
             "${UPSTREAM_URL}/rpmdevtools-${VERSION}.tar.xz"
 
-      - name: Install build dependencies
-        run: |
-          apt-get install -y -qq --no-install-recommends devscripts equivs > /dev/null
-          VERSION="${{ steps.version.outputs.version }}"
-          tar xf "rpmdevtools-${VERSION}.tar.xz"
-          cp -a debian "rpmdevtools-${VERSION}/"
-          cd "rpmdevtools-${VERSION}"
-          mk-build-deps --install \
-            --tool "apt-get -y -qq --no-install-recommends" \
-            debian/control > /dev/null
-
       - name: Build package
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          cd "rpmdevtools-${VERSION}"
-          dpkg-buildpackage -us -uc -b 2>&1
+        run: ./build.sh ${{ matrix.codename }}
 
       - name: Verify package contents
-        run: |
-          dpkg -c rpmdevtools_*.deb
+        run: dpkg -c ${{ matrix.codename }}/rpmdevtools_*.deb
